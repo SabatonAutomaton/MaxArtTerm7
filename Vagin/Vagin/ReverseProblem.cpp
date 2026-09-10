@@ -13,8 +13,12 @@ void ReverseProblem::ComputeTrueV( )
    double piSigma = 0.5 * 1 / ( std::numbers::pi * sigma );
    for ( int i = 0; i < n; i++ )
    {
-      trueV[i] = piSigma * trueI[i] * ( 1 / Distance( sourceBPos[i], receiverMPos[i] ) - 1 / Distance( sourceAPos[i], receiverMPos[i] ) -
-         ( 1 / Distance( sourceBPos[i], receiverNPos[i] ) - 1 / Distance( sourceAPos[i], receiverNPos[i] ) ) );
+      trueV[i] = 0;
+      for ( int j = 0; j < n; j++ )
+      {
+         trueV[i] += piSigma * trueI[j] * ( 1 / Distance( sourceBPos[j], receiverMPos[i] ) - 1 / Distance( sourceAPos[j], receiverMPos[i] ) -
+            ( 1 / Distance( sourceBPos[j], receiverNPos[i] ) - 1 / Distance( sourceAPos[j], receiverNPos[i] ) ) );
+      }
    }
 }
 
@@ -23,8 +27,12 @@ void ReverseProblem::ComputeCurrentV( )
    double piSigma = 0.5 * 1 / ( std::numbers::pi * sigma );
    for ( int i = 0; i < n; i++ )
    {
-      V[i] = piSigma * I[i] * ( 1 / Distance( sourceBPos[i], receiverMPos[i] ) - 1 / Distance( sourceAPos[i], receiverMPos[i] ) -
-         ( 1 / Distance( sourceBPos[i], receiverNPos[i] ) - 1 / Distance( sourceAPos[i], receiverNPos[i] ) ) );
+      V[i] = 0;
+      for ( int j = 0; j < n; j++ )
+      {
+         V[i] += piSigma * I[j] * ( 1 / Distance( sourceBPos[j], receiverMPos[i] ) - 1 / Distance( sourceAPos[j], receiverMPos[i] ) -
+            ( 1 / Distance( sourceBPos[j], receiverNPos[i] ) - 1 / Distance( sourceAPos[j], receiverNPos[i] ) ) );
+      }
    }
 }
 
@@ -34,11 +42,8 @@ void ReverseProblem::ComputeJacobian( )
    for ( int i = 0; i < n; i++ )
       for ( int j = 0; j < n; j++ )
       {
-         if ( i == j )
-            dVdI[i][j] = piSigma * ( 1 / Distance( sourceBPos[j], receiverMPos[i] ) - 1 / Distance( sourceAPos[j], receiverMPos[i] ) -
-               ( 1 / Distance( sourceBPos[j], receiverNPos[i] ) - 1 / Distance( sourceAPos[j], receiverNPos[i] ) ) );
-         else
-            dVdI[i][j] = 0;
+         dVdI[i][j] = piSigma * ( 1 / Distance( sourceBPos[j], receiverMPos[i] ) - 1 / Distance( sourceAPos[j], receiverMPos[i] ) -
+            ( 1 / Distance( sourceBPos[j], receiverNPos[i] ) - 1 / Distance( sourceAPos[j], receiverNPos[i] ) ) );
       }
 }
 
@@ -66,7 +71,10 @@ void ReverseProblem::BuildRightPart( )
 void ReverseProblem::Regularisation( )
 {
    for ( int i = 0; i < n; i++ )
+   {
       A[i][i] += alpha;
+      b[i] -= isApriori[i] * alpha * (I[i]-aprioriI[i]);
+   }
 }
 
 double ReverseProblem::CalcResidual( )
@@ -77,6 +85,13 @@ double ReverseProblem::CalcResidual( )
       double diff = V[i] - trueV[i];
       res += w2[i] * diff * diff;
    }
+
+   //// Добавляем регуляризационный член
+   //for ( int j = 0; j < n; j++ )
+   //{
+   //   res += alpha * I[j] * I[j];
+   //}
+
    return res;
 }
 
@@ -102,6 +117,7 @@ void ReverseProblem::Solve( )
    ComputeCurrentV( );
    residual = CalcResidual( );
    CalcIndividualResiduals( );
+   
    std::cout << 0 << "\t" << I[0] << "\t" << I[1] << "\t" << I[2] << "\t" << residual << "\t";
    for ( int i = 0; i < n; i++ )
    {
@@ -122,6 +138,7 @@ void ReverseProblem::Solve( )
       ComputeCurrentV( );
       BuildMatrix( );
       BuildRightPart( );
+      //gauss.printMatrix( A, b );
       Regularisation( );
 
       std::vector<double> deltaI = gauss.solve( A, b );
