@@ -13,8 +13,10 @@ public:
       A.resize( n, std::vector<double>( n, 0 ) );
       b.resize( n );
       dVdI.resize( n, std::vector<double>( n, 0 ) );
-      I.resize( n, 2.0 );
+      I.resize( n, 1.0 );
       trueI = _trueI;
+      isApriori = { 0, 0, 1 };
+      aprioriI = { 0, 0, 4 };
       trueV.resize( n );
       V.resize( n );
       w2.resize( n );
@@ -42,6 +44,8 @@ public:
    std::vector<double> I;
    std::vector<double> trueI;
    std::vector<double> trueV;
+   std::vector<double> aprioriI;
+   std::vector<bool> isApriori;
    std::vector<double> V;
    std::vector<std::vector<double>> dVdI;
    std::vector<xyz> receiverMPos;
@@ -50,7 +54,7 @@ public:
    std::vector<xyz> sourceBPos;
    std::vector<double> w2;
    std::vector<double> residuals;
-   double alpha = 1e-10;
+   double alpha = 0.001;
    double sigma = 0.01;
    double eps = 1e-10;
    int maxIter = 10;

@@ -67,3 +67,18 @@ vcpkg_installed/
 # test output & cache
 Testing/
 .cache/
+
+# Среды разработки (Visual Studio)
+.vs/
+*.VC.db
+*.VC.opendb
+*.suo
+*.user
+*.vsidx
+
+# Папки сборки MSVC (для Vagin, Vagin2 и будущих проектов)
+[Xx]64/
+[Xx]86/
+[Dd]ebug/
+[Rr]elease/
+*.tlog/

@@ -1,4 +1,5 @@
 #include "Gauss.h"
+#include <iomanip>
 
 vector<double> Gauss::solve( vector<vector<double>> A, vector<double> b ) {
    int n = A.size( );
@@ -57,9 +58,9 @@ void Gauss::printMatrix( const vector<vector<double>> &A, const vector<double> &
    int n = A.size( );
    for ( int i = 0; i < n; ++i ) {
       for ( int j = 0; j < n; ++j ) {
-         cout << A[i][j] << "\t";
+         cout << std::setprecision( 16 ) << A[i][j] << "\t";
       }
-      cout << "| " << b[i] << endl;
+      cout << "| " << std::setprecision(16) << b[i] << endl;
    }
    cout << endl;
 }
